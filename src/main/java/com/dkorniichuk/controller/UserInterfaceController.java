@@ -3,19 +3,27 @@ package com.dkorniichuk.controller;
 import com.dkorniichuk.service.FileService;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
+import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +34,9 @@ public class UserInterfaceController implements Initializable {
     Logger logger = LoggerFactory.getLogger(UserInterfaceController.class);
 
     @FXML
-    TreeView<String> directoriesTree;
+    TreeView<File> directoriesTree;
     @FXML
-    ListView<String> filesList;
+    ListView<File> filesList;
     @FXML
     TextField inputHost;
     @FXML
@@ -46,49 +54,109 @@ public class UserInterfaceController implements Initializable {
     @Autowired
     private FileService fileService;
 
+    private List<File> selectedItems = new ArrayList<>();
+
 
     public void initialize(URL location, ResourceBundle resources) {
         logger.info("start initializing...");
-       // setTreeMockUpData();
-        directoriesTree.setRoot(fileService.createDirectoryTree());
-        setListMockUpData();
+        initDirectoryTree(directoriesTree);
+        initFileList(filesList);
+        initImportButton(buttonImportData);
+        initTestConnectionButton(buttonTestConnection);
 
     }
 
-    private void setTreeMockUpData() {
-        TreeItem<String> root = new TreeItem<>("Root");
-        root.setExpanded(true);
+    private void initDirectoryTree(TreeView treeView) {
+        treeView.setRoot(fileService.createDirectoryTree());
 
-        TreeItem<String> nodeA = new TreeItem<>("nodeA");
-        TreeItem<String> nodeB = new TreeItem<>("nodeB");
-        root.getChildren().addAll(nodeA, nodeB);
-        nodeA.setExpanded(true);
+        treeView.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
+            @Override
+            public TreeCell<File> call(TreeView<File> param) {
+                return new TextFieldTreeCell<>(new StringConverter<File>() {
+                    @Override
+                    public String toString(File object) {
+                        return object.getName();
+                    }
 
-        TreeItem<String> nodeA1 = new TreeItem<>("nodeA1");
-        TreeItem<String> nodeA2 = new TreeItem<>("nodeA2");
-        nodeA.getChildren().addAll(nodeA1, nodeA2);
+                    @Override
+                    public File fromString(String string) {
+                        return null;
+                    }
+                });
+            }
+        });
 
-        directoriesTree.setRoot(root);
+        treeView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<File>>() {
+            @Override
+            public void changed(ObservableValue<? extends TreeItem<File>> observable, TreeItem<File> oldValue, TreeItem<File> newValue) {
+
+                List<File> files = new ArrayList<>();
+                for (File file : newValue.getValue().listFiles()) {
+                    if (file.isFile()) {
+                        files.add(file);
+                    }
+                }
+                ObservableList oItems = FXCollections.observableList(files);
+                filesList.setItems(oItems);
+                selectedItems.clear();
+
+            }
+        });
     }
 
-    private void setListMockUpData() {
-        List<String> items = new ArrayList();
-        items.add("item1");
-        items.add("item2");
-        items.add("item3");
+    private void initFileList(ListView listView) {
+        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<File, ObservableValue<Boolean>>() {
 
-        ObservableList oItems = FXCollections.observableList(items);
-        filesList.setItems(oItems);
-
-
-        filesList.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
-            public ObservableValue<Boolean> call(String item) {
+            public ObservableValue<Boolean> call(File item) {
                 BooleanProperty observable = new SimpleBooleanProperty();
+
                 observable.addListener((obs, wasSelected, isNowSelected) ->
-                        System.out.println("Check box for "+item+" changed from "+wasSelected+" to "+isNowSelected)//TODO: rewrite with lambda
-                );
-                return observable ;
+                {
+                    if (isNowSelected) {
+                        selectedItems.add(item);
+                    } else {
+                        selectedItems.remove(item);
+                    }
+
+                });
+                return observable;
+            }
+        }, new StringConverter<File>() {
+            @Override
+            public String toString(File object) {
+                return object.getName();
+            }
+
+            @Override
+            public File fromString(String string) {
+                return null;
             }
         }));
+    }
+
+    private void initImportButton(Button button) {
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                validateInputParameters();
+                fileService.processFiles(selectedItems);
+            }
+        });
+    }
+
+    private void initTestConnectionButton(Button button) {
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                validateInputParameters();
+               // databaseService.testConnection();
+            }
+        });
+    }
+
+    private void validateInputParameters(){
+       if (inputHost.getText().isEmpty()){
+           System.out.println("empty");
+       }
     }
 }

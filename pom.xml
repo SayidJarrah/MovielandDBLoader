@@ -38,6 +38,25 @@
             <version>1.7.25</version>
         </dependency>
 
+        <!--need to investigate this dependency, on home computer works fine without it,
+        but on workstation raised exception Provider com.ctc.wstx.stax.WstxInputFactory not found-->
+        <dependency>
+            <groupId>com.fasterxml.woodstox</groupId>
+            <artifactId>woodstox-core</artifactId>
+            <version>5.0.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.26</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>5.0.2.RELEASE</version>
+        </dependency>
+
 
     </dependencies>
 

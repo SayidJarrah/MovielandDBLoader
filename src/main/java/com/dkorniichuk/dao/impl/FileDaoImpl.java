@@ -11,7 +11,7 @@ import java.io.File;
 @Repository
 public class FileDaoImpl implements FileDao {
     Logger logger = LoggerFactory.getLogger(FileDaoImpl.class);
-    private static final String ROOT_PATH = "E:\\MovieDBLoader";
+    private static final String ROOT_PATH = "D:\\logs";
 
     @Override
     public Node<File> load() {

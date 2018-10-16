@@ -18,29 +18,29 @@ public class FileServiceImpl implements FileService {
     private FileDao fileDao;
 
     @Override
-    public TreeItem<String> createDirectoryTree() {
+    public TreeItem<File> createDirectoryTree() {
         Node<File> directoryTree = fileDao.load();
-
-        TreeItem<String> root = new TreeItem<>(directoryTree.getData().getName());
-        TreeItem<String> tree = traverse(directoryTree, root);
+        TreeItem<File> tree = convertCustomTreeToTreeView(directoryTree, new TreeItem(directoryTree.getData()));
         return tree;
     }
 
-    public TreeItem<String> traverse(Node<File> parentNode, TreeItem<String> root) {
+
+    public TreeItem<File> convertCustomTreeToTreeView(Node<File> parentNode, TreeItem<File> root) {
         List<Node<File>> nodes = parentNode.getChildren();
         for (Node<File> node : nodes) {
-            System.out.println(node.getData().getName());
-            if(node.getData().isDirectory()) {
-                TreeItem<String> treeItem = new TreeItem<>(node.getData().getName());
+            if (node.getData().isDirectory()) {
+                TreeItem<File> treeItem = new TreeItem(node.getData());
                 root.getChildren().add(treeItem);
-                traverse(node, treeItem);
+                convertCustomTreeToTreeView(node, treeItem);
             }
         }
         return root;
     }
 
     @Override
-    public String getFilesList() {
-        return null;
+    public void processFiles(List<File> selectedFiles) {
+        System.out.println(selectedFiles);
     }
+
+
 }
