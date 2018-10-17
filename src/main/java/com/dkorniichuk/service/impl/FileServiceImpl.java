@@ -5,9 +5,12 @@ import com.dkorniichuk.dao.utils.Node;
 import com.dkorniichuk.service.FileService;
 import javafx.scene.control.TreeItem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,6 +19,9 @@ public class FileServiceImpl implements FileService {
 
     @Autowired
     private FileDao fileDao;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public TreeItem<File> createDirectoryTree() {
@@ -40,6 +46,9 @@ public class FileServiceImpl implements FileService {
     @Override
     public void processFiles(List<File> selectedFiles) {
         System.out.println(selectedFiles);
+        jdbcTemplate.execute("SELECT SYSDATE()  FROM DUAL");
+        List list = jdbcTemplate.queryForList("select * from database_info");
+        System.out.println(list);
     }
 
 

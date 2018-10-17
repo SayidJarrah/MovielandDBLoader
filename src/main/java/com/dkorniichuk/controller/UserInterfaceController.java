@@ -1,5 +1,6 @@
 package com.dkorniichuk.controller;
 
+import com.dkorniichuk.entity.DataSourceProperty;
 import com.dkorniichuk.service.FileService;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -138,7 +139,8 @@ public class UserInterfaceController implements Initializable {
         button.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                validateInputParameters();
+                validateInputParameters(); //TODO
+                instantiateDataSource();
                 fileService.processFiles(selectedItems);
             }
         });
@@ -159,4 +161,22 @@ public class UserInterfaceController implements Initializable {
            System.out.println("empty");
        }
     }
+
+    private void instantiateDataSource(){
+        DataSourceProperty dataSourceProperty = new DataSourceProperty();
+       /* dataSourceProperty.setHost(inputHost.getText());
+        dataSourceProperty.setPort(inputPort.getText());
+        dataSourceProperty.setUser(inputUser.getText());
+        dataSourceProperty.setPassword(inputPassword.getText());*/
+
+
+        dataSourceProperty.setHost("jdbc:mysql://localhost/whd2");
+        dataSourceProperty.setPort(inputPort.getText());
+        dataSourceProperty.setUser("whd2");
+        dataSourceProperty.setPassword("whd2");
+
+        System.out.println(dataSourceProperty.toString());
+    }
+
+
 }
